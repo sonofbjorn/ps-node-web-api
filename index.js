@@ -1,11 +1,17 @@
-var http = require('http');
 var express = require('express');
+var app = express();
 
-http.createServer(function (req, res) {
-  res.writeHead(200, {
-    'Content-Type': 'text/plain'
-  });
-  res.end('Hello world\n');
-}).listen(3000, '127.0.0.1'); 
+var bodyParser = require('body-parser');
 
-console.log('Server running at http://127.0.0.1:3000/');
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({
+  extended: true
+}));
+
+// requiring a file (cats) and passing app into the file
+// note that "cats" returns a function
+var cats = require('./cats.js')(app);
+
+var server = app.listen(3000, function () {
+  console.log('Server running at http://127.0.0.1:3000/');
+});
