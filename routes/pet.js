@@ -48,10 +48,20 @@ module.exports = function(app) {
         }
       },
       function(error, results) {
+        var y = 1;
+        for(var x=0; x<200000; x++) {
+          y+=x;
+          console.log(x);
+        }
         res.json({
           error: error,
           results: results
         })
       });
+  });
+  app.get('/ping', function(req, res) {
+    res.json({
+      pong: Date.now()
+    });
   });
 }
