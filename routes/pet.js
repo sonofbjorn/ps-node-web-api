@@ -56,7 +56,7 @@ module.exports = function(app) {
         res.json({
           error: error,
           results: results
-        })
+        });
       });
   });
   app.get('/ping', function(req, res) {
