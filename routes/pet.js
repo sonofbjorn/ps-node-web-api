@@ -4,6 +4,8 @@ var r = require('request').defaults({
 });
 
 var async = require('async');
+var redis = require('redis');
+var client = redis.createClient(6379, '127.0.0.1')
 
 module.exports = function(app) {
   // Read
@@ -29,20 +31,31 @@ module.exports = function(app) {
           });
         },
         dog: function(callback) {
-          r({
-            uri: 'http://localhost:3001/dog'
-          }, function(error, response, body) {
+          var dogUri = 'http://localhost:3001/dog';
+          client.get(dogUri, function(error, dogs) {
             if (error) {
-              callback({
-                service: 'dog',
-                error: error
-              });
-              return;
+              throw error;
             }
-            if (!error && response.statusCode === 200) {
-              callback(null, body);
+            if (dogs) {
+              callback(null, JSON.parse(dogs));
             } else {
-              res.send(response.statusCode);
+              r({
+                uri: dogUri
+              }, function(error, response, body) {
+                if (error) {
+                  callback({
+                    service: 'dog',
+                    error: error
+                  });
+                  return;
+                }
+                if (!error && response.statusCode === 200) {
+                  callback(null, body.data);
+                  client.setex(dogUri, 10, JSON.stringify(body.data));
+                } else {
+                  res.send(response.statusCode);
+                }
+              });
             }
           });
         }
